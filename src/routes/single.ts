@@ -3,18 +3,19 @@ const router = new Router({ prefix: '/single' })
 
 import fs from 'fs'
 import ytdl from 'ytdl-core'
+import ytsr from 'ytsr'
 
 interface requestInterface { id: string }
 
 router.get('/', async (ctx, next) => {
-	ctx.body = `<form action="/single" method="post"><input type="text" name="id"><input type="submit"></form>`
+	ctx.body = `<head><link rel="stylesheet" href="https://unpkg.com/bamboo.css"></head><form action="/single" method="post"><input type="text" name="id" placeholder="Fightman - Casiopea vs Tsquare"><input type="submit"></form>`
 })
 
 router.post('/', async (ctx, next) => {
 	let requestBody = <requestInterface>ctx.request.body
-	ctx.response.set('content-type', 'audio/mpeg')
-	ctx.response.set('content-disposition', `attachment; filename=${requestBody.id}.mp3`)
-	ctx.body = ytdl(requestBody.id, {filter: 'audioonly'})
+	let found:any = (await ytsr(requestBody.id, { 'limit': 1 })).items[0]
+	ctx.response.set('content-disposition', `attachment; filename*=UTF-8''${requestBody.id.replace(/[/\\?%*:|"<>]/g, '-')}.mp3`)
+	ctx.body = ytdl(found.id, {filter: 'audioonly'})
 })
 
 export default router
